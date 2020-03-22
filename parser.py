@@ -4,6 +4,10 @@
 # newFileByteArray = bytearray(newFileBytes)
 # newFile = open("EIGBUCH-edit.txt", "wb")
 
+def nope():
+    print("NOPE")
+    exit(0)
+
 entries = list()
 currentEntry = ""
 
@@ -51,14 +55,35 @@ for entry in entries:
     # print(entry)
     # print(entry.index('ISBN:'))
     titleF = entry[:entry.index('ISBN:')]
-    # print(titleF)
+    print(titleF.replace('\n', ' ').replace('\r', '').strip()[2:])
     rest = entry[entry.index('ISBN:'):]
     # print(rest)
-    print(rest[:26])
-    print(rest[26:52])
-    print(rest[52:69])
-    print(rest[69:75])
-    print(rest[77:127])
-    # print(rest[:26])
-    # print(entry[90:95])
-    print('---')
+
+    print(rest[:26]) #ISBN
+    if "ISBN" not in rest[:26]: nope()
+    print(rest[26:52]) #Verlag
+    if "Verlag" not in rest[26:52]: nope()
+    print(rest[52:69]) #Sprache
+    if "Sprache" not in rest[52:69]: nope()
+    print(rest[69:75]) #Art
+    if "Art" not in rest[69:75]: nope()
+    print(rest[77:127]) #Originaltitel
+    if "Originaltitel" not in rest[77:127]: nope()
+    print(rest[129:145]) #Erstersch.
+    if "Erstersch." not in rest[129:145]: nope()
+
+    print(rest[146:180])
+    print(rest[180:198])
+    print(rest[211:237])
+    print(rest[237:263])
+    print(rest[276:301])
+    print(rest[301:330])
+    print(rest[330:340])
+    print(rest[340:365])
+    print(rest[365:397])
+    print(rest[406:442])
+    print(rest[444:460])
+    print(rest[460:493])
+    print(rest[493:506])
+
+    print('\n---\n')
