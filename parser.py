@@ -4,6 +4,10 @@
 # newFileByteArray = bytearray(newFileBytes)
 # newFile = open("EIGBUCH-edit.txt", "wb")
 
+flag_newentry = False
+
+o = open("EIGBUCH-out-v1.txt", "w")
+
 f = open("EIGBUCH-head.dat", 'rb')
 # f = open("EIGBUCH-head.dat", 'rb')
 byte = f.read(1)
@@ -22,8 +26,14 @@ while byte:
     if byte == b'\xFA': #.
         byte = b'\x2E'
     if byte == b'\x1A': #Lücke
+        flag_newentry = True
         continue
-        # print("HIT!")
-        # print(byte.decode("ISO-8859-1"), end = '')
-    # else:
-    print(byte.decode("ISO-8859-1"), end='')
+
+    c = byte.decode("ISO-8859-1")
+
+    if flag_newentry:
+        o.write("\n\n-----\n\n")
+        flag_newentry = False
+    o.write(c)
+
+    print(c, end='')
