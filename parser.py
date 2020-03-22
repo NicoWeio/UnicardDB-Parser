@@ -4,9 +4,11 @@
 # newFileByteArray = bytearray(newFileBytes)
 # newFile = open("EIGBUCH-edit.txt", "wb")
 
+
 def nope():
     print("NOPE")
     exit(0)
+
 
 entries = list()
 currentEntry = ""
@@ -22,17 +24,17 @@ while byte:
     # Do stuff with byte.
     byte = f.read(1)
     # print(byte)
-    if byte == b'\x84': #ä
+    if byte == b'\x84':  # ä
         byte = b'\xE4'
-    if byte == b'\x94': #ö
+    if byte == b'\x94':  # ö
         byte = b'\xF6'
-    if byte == b'\x81': #ü
+    if byte == b'\x81':  # ü
         byte = b'\xFC'
-    if byte == b'\x9A': #Ü
+    if byte == b'\x9A':  # Ü
         byte = b'\xDC'
-    if byte == b'\xFA': #.
+    if byte == b'\xFA':  # .
         byte = b'\x2E'
-    if byte == b'\x1A': #Lücke
+    if byte == b'\x1A':  # Lücke
         flag_newentry = True
         continue
 
@@ -59,31 +61,24 @@ for entry in entries:
     rest = entry[entry.index('ISBN:'):]
     # print(rest)
 
-    print(rest[:26]) #ISBN
-    if "ISBN" not in rest[:26]: nope()
-    print(rest[26:52]) #Verlag
-    if "Verlag" not in rest[26:52]: nope()
-    print(rest[52:69]) #Sprache
-    if "Sprache" not in rest[52:69]: nope()
-    print(rest[69:75]) #Art
-    if "Art" not in rest[69:75]: nope()
-    print(rest[77:127]) #Originaltitel
-    if "Originaltitel" not in rest[77:127]: nope()
-    print(rest[129:145]) #Erstersch.
-    if "Erstersch." not in rest[129:145]: nope()
-
-    print(rest[146:180])
-    print(rest[180:198])
-    print(rest[211:237])
-    print(rest[237:263])
-    print(rest[276:301])
-    print(rest[301:330])
-    print(rest[330:340])
-    print(rest[340:365])
-    print(rest[365:397])
-    print(rest[406:442])
-    print(rest[444:460])
-    print(rest[460:493])
-    print(rest[493:506])
+    print(rest[0:26])  # ISBN
+    print(rest[26:52])  # Verlag
+    print(rest[52:69])  # Sprache
+    print(rest[69:75])  # Art
+    print(rest[77:127])  # Originaltitel
+    print(rest[129:145])  # Erstersch.
+    print(rest[146:180])  # geliehen.von
+    print(rest[180:198])  # am
+    print(rest[211:237])  # Ausleihe.offen?
+    print(rest[237:263])  # Rückgdatum
+    print(rest[276:301])  # Herkunft
+    print(rest[301:330])  # Herk.datum
+    print(rest[330:340])  # Preis
+    print(rest[340:365])  # verliehen
+    print(rest[365:397])  # an
+    print(rest[406:442])  # Bemerkungen.und.Stichworte
+    print(rest[444:460])  # zu.lesen
+    print(rest[460:493])  # wo.gesehen
+    print(rest[493:506])  # Signatur
 
     print('\n---\n')
