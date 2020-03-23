@@ -10,6 +10,49 @@ def nope():
     exit(0)
 
 
+def read_single(content, startsWith):
+    trimContent = content.replace('\n', '').strip()
+    if not trimContent.startswith(startsWith):
+        print(f'!!! "{trimContent}" does not start with "{startsWith}"')
+        # exit(1)
+    return trimContent.replace(startsWith, '').strip()
+
+
+def read_v1(rest):
+    entry = {
+        'isbn': read_single(rest[0:26],    'ISBN')[2:],
+        'verlag': read_single(rest[26:52],   'Verlag')[2:],
+        'sprache': read_single(rest[52:69],   'Sprache'),
+        'art': read_single(rest[69:75],   'Art'),
+        'originaltitel': read_single(rest[77:127],  'Originaltitel'),
+        'erstersch': read_single(rest[129:145], 'Erstersch.'),
+        'geliehen': read_single(rest[146:180], 'geliehen.von'),
+        'geliehen_am': read_single(rest[180:198], 'am'),
+        'ausleihe': read_single(rest[211:237], 'Ausleihe.offen?'),
+        'rueckg_datum': read_single(rest[237:263], 'Rückgdatum'),
+        'herkunft': read_single(rest[276:301], 'Herkunft'),
+        'herkunft_datum': read_single(rest[301:330], 'Herk.datum'),
+        'preis': read_single(rest[330:340], 'Preis'),
+        'verliehen': read_single(rest[341:365], 'verliehen'),
+        'verliehen_an': read_single(rest[366:397], 'an'),
+    }
+    # read_single(rest[407:442], 'todo', 'Bemerkungen.und.Stichworte')
+    # read_single(rest[444:460], 'todo', 'zu.lesen')
+    # read_single(rest[460:493], 'todo', 'wo.gesehen')
+    # read_single(rest[493:506], 'todo', 'Signatur')
+    return entry
+
+def write_csv(entries):
+    import csv
+
+    with open('out_v1.csv', 'w', newline='') as csvfile:
+        fieldnames = ['isbn', 'verlag']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, extrasaction='ignore')
+
+        writer.writeheader()
+        for row in entries:
+            writer.writerow(row)
+
 entries = list()
 currentEntry = ""
 
@@ -17,7 +60,7 @@ flag_newentry = False
 
 # o = open("EIGBUCH-out-v1.txt", "w")
 
-f = open("EIGBUCH-head.dat", 'rb')
+f = open("EIGBUCH.dat", 'rb')
 # f = open("EIGBUCH-head.dat", 'rb')
 byte = f.read(62)
 while byte:
@@ -53,32 +96,39 @@ while byte:
 
     # print(c, end='')
 
+parsed_entries = list()
+
 for entry in entries:
     # print(entry)
-    # print(entry.index('ISBN:'))
-    titleF = entry[:entry.index('ISBN:')]
-    print(titleF.replace('\n', ' ').replace('\r', '').strip()[2:])
+    print("-----")
+
+    if 'verliehen? (n) an:' in entry:
+        print('Guessed Type 2: TODO')
+        continue
+    if not 'ISBN:' in entry:
+        print('!!! quite fatal: ISBN not found')
+        continue
+    if 'verliehen..ja(n)' in entry:
+        print('Guessed Type 1… All good… Yet…')
+    else:
+        print('!!!!!!!!!!!!!!!!!!')
+        print("Not recognized: ")
+        print(entry)
+        print('!!!!!!!!!!!!!!!!!!')
+
     rest = entry[entry.index('ISBN:'):]
-    # print(rest)
+    parsed_entry = read_v1(rest)
 
-    print(rest[0:26])  # ISBN
-    print(rest[26:52])  # Verlag
-    print(rest[52:69])  # Sprache
-    print(rest[69:75])  # Art
-    print(rest[77:127])  # Originaltitel
-    print(rest[129:145])  # Erstersch.
-    print(rest[146:180])  # geliehen.von
-    print(rest[180:198])  # am
-    print(rest[211:237])  # Ausleihe.offen?
-    print(rest[237:263])  # Rückgdatum
-    print(rest[276:301])  # Herkunft
-    print(rest[301:330])  # Herk.datum
-    print(rest[330:340])  # Preis
-    print(rest[340:365])  # verliehen
-    print(rest[365:397])  # an
-    print(rest[406:442])  # Bemerkungen.und.Stichworte
-    print(rest[444:460])  # zu.lesen
-    print(rest[460:493])  # wo.gesehen
-    print(rest[493:506])  # Signatur
+    parsed_entries.append(parsed_entry)
 
-    print('\n---\n')
+    # print(entry.index('ISBN:'))
+    # titleF = entry[:entry.index('ISBN:')]
+    # print(titleF.replace('\n', ' ').replace('\r', '').strip()[2:] + '\n\n')
+    # rest = entry[entry.index('ISBN:'):]
+    # # print(rest)
+    #
+    # result1 = read_v1(rest)
+    #
+    # print('\n---\n')
+
+write_csv(parsed_entries)
