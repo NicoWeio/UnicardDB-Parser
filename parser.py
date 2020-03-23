@@ -11,9 +11,11 @@ def nope():
 
 
 def read_single(content, startsWith):
-    trimContent = content.replace('\n', '').strip()
+    global error_count
+    trimContent = content.replace('\n', '').replace('\r', '').strip()
     if not trimContent.startswith(startsWith):
         print(f'!!! "{trimContent}" does not start with "{startsWith}"')
+        error_count = error_count + 1
         # exit(1)
     return trimContent.replace(startsWith, '').strip()
 
@@ -46,8 +48,10 @@ def write_csv(entries):
     import csv
 
     with open('out_v1.csv', 'w', newline='') as csvfile:
-        fieldnames = ['isbn', 'verlag']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, extrasaction='ignore')
+        fieldnames = ['isbn', 'verlag', 'sprache', 'art', 'originaltitel', 'erstersch', 'geliehen', 'geliehen_am',
+                      'ausleihe', 'rueckg_datum', 'herkunft', 'herkunft_datum', 'preis', 'verliehen', 'verliehen_an']
+        writer = csv.DictWriter(
+            csvfile, fieldnames=fieldnames, extrasaction='ignore')
 
         writer.writeheader()
         for row in entries:
@@ -57,6 +61,9 @@ entries = list()
 currentEntry = ""
 
 flag_newentry = False
+error_count = 0
+type1_count = 0
+type2_count = 0
 
 # o = open("EIGBUCH-out-v1.txt", "w")
 
@@ -104,12 +111,14 @@ for entry in entries:
 
     if 'verliehen? (n) an:' in entry:
         print('Guessed Type 2: TODO')
+        type2_count += 1
         continue
     if not 'ISBN:' in entry:
         print('!!! quite fatal: ISBN not found')
         continue
     if 'verliehen..ja(n)' in entry:
         print('Guessed Type 1… All good… Yet…')
+        type1_count += 1
     else:
         print('!!!!!!!!!!!!!!!!!!')
         print("Not recognized: ")
@@ -130,5 +139,9 @@ for entry in entries:
     # result1 = read_v1(rest)
     #
     # print('\n---\n')
+
+print("ERROR COUNT: " + str(error_count))
+print("TYPE 1 COUNT: " + str(type1_count))
+print("TYPE 2 COUNT: " + str(type2_count))
 
 write_csv(parsed_entries)
