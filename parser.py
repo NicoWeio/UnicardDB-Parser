@@ -11,11 +11,13 @@ def nope():
 
 
 def read_single(content, startsWith):
-    global error_count
+    global total_error_count
+    global flag_error_in_entry
     trimContent = content.replace('\n', '').replace('\r', '').strip()
     if not trimContent.startswith(startsWith):
         print(f'!!! "{trimContent}" does not start with "{startsWith}"')
-        error_count = error_count + 1
+        total_error_count = total_error_count + 1
+        flag_error_in_entry = True
         # exit(1)
     return trimContent.replace(startsWith, '').strip()
 
@@ -63,12 +65,16 @@ entries = list()
 currentEntry = ""
 
 flag_newentry = False
+flag_error_in_entry = False
 error_count = 0
+total_error_count = 0
 type1_count = 0
 type2_count = 0
 unrecognized_count = 0
 
 # o = open("EIGBUCH-out-v1.txt", "w")
+
+unrecognized_out = open("unrecognized.txt", "w")
 
 f = open("EIGBUCH.dat", 'rb')
 # f = open("EIGBUCH-head.dat", 'rb')
@@ -128,12 +134,14 @@ for entry in entries:
         print(entry)
         print('!!!!!!!!!!!!!!!!!!')
         unrecognized_count += 1
+        continue
 
     rest = entry[entry.index('ISBN:'):]
     # parsed_entry = read_v1(rest)
     # parsed_entries.append(parsed_entry)
 
     lines = rest.splitlines()
+    flag_error_in_entry = False
     parsed_entry = {
         'isbn': read_single(lines[0][:26],    'ISBN:'),
         'verlag': read_single(lines[0][26:52],   'Verlag:'),
@@ -151,10 +159,18 @@ for entry in entries:
         'verliehen': read_single(lines[8][:25], 'verliehen..ja(')[:-1],
         'verliehen_an': read_single(lines[8][25:57], 'an:'),
     }
-    parsed_entries.append(parsed_entry)
+    if flag_error_in_entry:
+        print("→ Error in current…")
+        unrecognized_out.write(entry)
+        unrecognized_out.write('\n-----\n')
+        flag_error_in_entry = False
+        error_count += 1
+    else:
+        parsed_entries.append(parsed_entry)
 
 
-print("ERROR COUNT: " + str(error_count))
+print("ERROR ENTRIES COUNT: " + str(error_count))
+print("TOTAL ERROR COUNT: " + str(total_error_count))
 print("TYPE 1 COUNT: " + str(type1_count))
 print("TYPE 2 COUNT: " + str(type2_count))
 print("UNRECOGNIZED COUNT: " + str(unrecognized_count))
