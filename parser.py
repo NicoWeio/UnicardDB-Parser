@@ -21,6 +21,31 @@ def read_single(content, startsWith):
         # exit(1)
     return trimContent.replace(startsWith, '').strip()
 
+def read_line(line, keywords):
+    global total_error_count
+    global flag_error_in_entry
+    result = list()
+    for i, keyword in enumerate(keywords):
+        try:
+            indexstart = line.index(keyword)+len(keyword)
+            if ((i+1) < len(keywords)):
+                next = keywords[i+1]
+                sub = line[indexstart:line.index(next)]
+                # result.append(line[indexstart:line.index(next)].strip())
+            else:
+                # result.append(line[indexstart:].strip())
+                sub = line[indexstart:]
+            if sub.strip() == '.':
+                result.append('')
+            else:
+                result.append(sub.strip())
+        except:
+            print("Substring not found…")
+            total_error_count += 1
+            flag_error_in_entry = True
+            result.append(False)
+    return result
+
 
 def read_v1(rest):
     entry = {
@@ -93,6 +118,8 @@ while byte:
         byte = b'\xDC'
     if byte == b'\xFA':  # .
         byte = b'\x2E'
+    if byte == b'\xE1':  # ß
+        byte = b'\xDF'
     if byte == b'\x1A':  # Lücke
         flag_newentry = True
         continue
@@ -142,23 +169,36 @@ for entry in entries:
 
     lines = rest.splitlines()
     flag_error_in_entry = False
+
+    # print(lines[8])
+
+    results = [read_line(lines[0], ['ISBN:', 'Verlag:', 'Sprache:', 'Art:']),
+                read_line(lines[1], ['Originaltitel:', 'Erstersch.:']),
+                read_line(lines[3], ['geliehen.von:', 'am:', 'Signatur:']),
+                read_line(lines[4], ['Ausleihe.offen?:', 'Rückgdatum:', 'z.am:']),
+                read_line(lines[7], ['Herkunft:', 'Herk.datum:', 'Preis:']),
+                read_line(lines[8], ['verliehen..ja', 'an:', 'am:']),
+    ]
+    print(results)
+
     parsed_entry = {
-        'isbn': read_single(lines[0][:26],    'ISBN:'),
-        'verlag': read_single(lines[0][26:52],   'Verlag:'),
-        'sprache': read_single(lines[0][52:69],   'Sprache:'),
-        'art': read_single(lines[0][69:75],   'Art:'),
-        'originaltitel': read_single(lines[1][:52],  'Originaltitel:'),
-        'erstersch': read_single(lines[1][52:], 'Erstersch.:'),
-        'geliehen': read_single(lines[3][:34], 'geliehen.von:'),
-        'geliehen_am': read_single(lines[3][34:52], 'am:'),
-        'ausleihe': read_single(lines[4][:26], 'Ausleihe.offen?:'),
-        'rueckg_datum': read_single(lines[4][26:52], 'Rückgdatum:'),
-        'herkunft': read_single(lines[7][:25], 'Herkunft:'),
-        'herkunft_datum': read_single(lines[7][25:54], 'Herk.datum:'),
-        'preis': read_single(lines[7][54:], 'Preis:'),
-        'verliehen': read_single(lines[8][:25], 'verliehen..ja(')[:-1],
-        'verliehen_an': read_single(lines[8][25:57], 'an:'),
+        'isbn': results[0][0],
+        'verlag': results[0][1],
+        'sprache': results[0][2],
+        'art': results[0][3],
+        'originaltitel': results[1][0],
+        'erstersch': results[1][1],
+        'geliehen': results[2][0],
+        'geliehen_am': results[2][1],
+        'ausleihe': results[3][0],
+        'rueckg_datum': results[3][1],
+        'herkunft': results[4][0],
+        'herkunft_datum': results[4][1],
+        'preis': results[4][2],
+        'verliehen': results[5][0],
+        'verliehen_an': results[5][1],
     }
+
     if flag_error_in_entry:
         print("→ Error in current…")
         unrecognized_out.write(entry)
